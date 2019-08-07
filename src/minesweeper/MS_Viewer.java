@@ -34,8 +34,6 @@ public class MS_Viewer extends JPanel {
 		bombs_panel.setPreferredSize(new Dimension(TILE_DIMENSION * model.getWidth(), 30));
 		bombs_panel.setBackground(Color.BLACK);
 		bombs_left = new JLabel();
-		bombs_left.setForeground(Color.GREEN);
-		bombs_left.setText(new String("Bombs left: " + model.getNumberOfBombs()));
 		bombs_panel.add(bombs_left);
 		frame.setLocationRelativeTo(null);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -43,6 +41,7 @@ public class MS_Viewer extends JPanel {
 		frame.add(this, BorderLayout.NORTH);
 		frame.add(bombs_panel, BorderLayout.SOUTH);
 		frame.pack();
+		frame.setResizable(false);
 		frame.setVisible(true);
 	}
 	
@@ -68,6 +67,10 @@ public class MS_Viewer extends JPanel {
 				}
 				g.fillRect(i * TILE_DIMENSION, j * TILE_DIMENSION,
 							TILE_DIMENSION - 1, TILE_DIMENSION - 1);
+				if (model.isDead() && tiles[i][j] == -1) {
+					g.setColor(Color.BLACK);
+					g.fillOval(i * TILE_DIMENSION + TILE_DIMENSION / 5, j * TILE_DIMENSION + TILE_DIMENSION / 5, 3 * TILE_DIMENSION / 5 - 1, 3 * TILE_DIMENSION / 5 - 1);
+				}
 				if (states[i][j] == MS_Model.TileState.VISIBLE) {
 					g.setColor(Color.BLACK);
 					if (tiles[i][j] > 0)
@@ -75,11 +78,6 @@ public class MS_Viewer extends JPanel {
 					continue;
 				} else if (states[i][j] == MS_Model.TileState.FLAGGED) {
 					g.setColor(Color.RED);
-//					int[] x_pts = {i * TILE_DIMENSION, i * TILE_DIMENSION, (i + 1) * TILE_DIMENSION - TILE_DIMENSION / 2};
-//					int[] y_pts = {j * TILE_DIMENSION, (j + 1) * TILE_DIMENSION - TILE_DIMENSION / 2, j * TILE_DIMENSION + TILE_DIMENSION / 4};
-//					g.fillPolygon(x_pts, y_pts, 3);
-//					g.drawLine(i * TILE_DIMENSION, j * TILE_DIMENSION, (i+1) * TILE_DIMENSION, (j+1) * TILE_DIMENSION);
-//					g.drawLine((i+1) * TILE_DIMENSION, j * TILE_DIMENSION, i * TILE_DIMENSION, (j+1) * TILE_DIMENSION);
 					g.drawString("!", i * TILE_DIMENSION + TILE_DIMENSION / 5, j * TILE_DIMENSION + 4 * TILE_DIMENSION / 5);
 				}
 			}

@@ -4,7 +4,11 @@ import java.util.Random;
 
 public class MS_Model {
 	
-	enum TileState {
+	private enum GameState {
+		ALIVE, DEAD, NOT_INITIALIZED, WON
+	}
+	
+	public enum TileState {
 		VISIBLE, HIDDEN, FLAGGED
 	}
 	
@@ -12,9 +16,10 @@ public class MS_Model {
 	private final int HEIGHT;
 	private final int BOMBS;
 	private int num_flagged;
-	private int[][] tiles;
-	private TileState[][] states;
-	private boolean alive;
+	private final int[][] tiles;
+	private final TileState[][] states;
+	private GameState gamestate;
+	private final Random r;
 	
 	public MS_Model(int w, int h, int bombs) {
 		WIDTH = w;
@@ -22,21 +27,29 @@ public class MS_Model {
 		BOMBS = bombs;
 		tiles = new int[w][h];
 		states = new TileState[w][h];
-		alive = false;
-		initializeBoard();
+		r = new Random();
+		prepareBoard();
 	}
 	
 	public int getNumUnflaggedBombs() {
 		return BOMBS - num_flagged;
 	}
 	
-	public void initializeBoard() {
+	public void prepareBoard() {
 		resetBoard(-10, -10);
-		alive = false;
+		gamestate = GameState.NOT_INITIALIZED;
 	}
 
+	public boolean isDead() {
+		return gamestate == GameState.DEAD;
+	}
+	
+	public boolean hasWon() {
+		return gamestate == GameState.WON;
+	}
+	
 	public boolean isAlive() {
-		return alive;
+		return gamestate == GameState.ALIVE;
 	}
 	
 	public int[][] getTiles() {
@@ -48,7 +61,7 @@ public class MS_Model {
 	}
 
 	public void resetBoard(int X_PROTECTED, int Y_PROTECTED) {
-		alive = true;
+		gamestate = GameState.ALIVE;
 		num_flagged = 0;
 		for (int i = 0; i < WIDTH; i++) {
 			for (int j = 0; j < HEIGHT; j++) {
@@ -56,7 +69,6 @@ public class MS_Model {
 				states[i][j] = TileState.HIDDEN;
 			}
 		}
-		Random r = new Random();
 		for (int i = 0; i < BOMBS;) {
 			int w = r.nextInt(WIDTH);
 			int h = r.nextInt(HEIGHT);
@@ -87,19 +99,24 @@ public class MS_Model {
 		return val;
 	}
 	
-	public boolean leftClick(int x, int y) {
-		if (!isAlive()) resetBoard(x, y);
+	public void leftClick(int x, int y) {
+		switch (gamestate) {
+		case WON:
+		case DEAD:				prepareBoard();
+								return;
+		case NOT_INITIALIZED:	resetBoard(x, y);
+		}
 		if (states[x][y] == TileState.VISIBLE ||
-			states[x][y] == TileState.FLAGGED) return true;
+			states[x][y] == TileState.FLAGGED) return;
 		if (tiles[x][y] == -1) {
-			initializeBoard();
-			return false;
+			gamestate = GameState.DEAD;
+			return;
 		}
 		if (tiles[x][y] == 0) {
 			makeSectionVisible(x, y);
 		} else
 			states[x][y] = TileState.VISIBLE;
-		return !checkOnlyBombsHidden();
+		gamestate = checkOnlyBombsHidden() ? GameState.WON : gamestate;
 	}
 	
 	private boolean checkOnlyBombsHidden() {
@@ -115,14 +132,13 @@ public class MS_Model {
 	}
 
 	public void rightClick(int x, int y) {
-		if (!isAlive()) return;
-//		if (states[x][y] == TileState.VISIBLE) return;
-//		states[x][y] = states[x][y] == TileState.HIDDEN ?
-//						TileState.FLAGGED : TileState.HIDDEN;
-//		if (states[x][y] == TileState.HIDDEN) {
-//			states[x][y] = TileState.FLAGGED;
-//			num_flagged++;
-//		}
+		switch (gamestate) {
+		case WON:
+		case DEAD:				prepareBoard();
+								return;
+		case NOT_INITIALIZED:	return;
+		}
+		
 		switch (states[x][y]) {
 		case HIDDEN:	states[x][y] = TileState.FLAGGED;
 						num_flagged++;
@@ -152,10 +168,6 @@ public class MS_Model {
 	
 	public int getHeight() {
 		return HEIGHT;
-	}
-	
-	public int getNumberOfBombs() {
-		return BOMBS;
 	}
 
 }

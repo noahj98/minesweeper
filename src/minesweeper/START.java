@@ -16,7 +16,6 @@ public class START {
 		//good luck	100
 		
 		MS_Controller controller = new MS_Controller(TILE_PIX, W_TILE, H_TILE, NUM_BOMBS);
-		controller.start();
 		
 	}
 
