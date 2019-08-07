@@ -39,8 +39,8 @@ public class MS_Controller implements MouseListener {
 				if (model.isAlive()) {
 					viewer.updateUI();
 					JOptionPane.showMessageDialog(null, null);
+					model.initializeBoard();
 				}
-				model.resetBoard();
 			}
 		} else if (e.getButton() == MouseEvent.BUTTON3) {
 			model.rightClick(e.getX()/viewer.getTileDimension(),

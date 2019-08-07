@@ -11,6 +11,7 @@ public class MS_Model {
 	private final int WIDTH;
 	private final int HEIGHT;
 	private final int BOMBS;
+	private int num_flagged;
 	private int[][] tiles;
 	private TileState[][] states;
 	private boolean alive;
@@ -21,7 +22,17 @@ public class MS_Model {
 		BOMBS = bombs;
 		tiles = new int[w][h];
 		states = new TileState[w][h];
-		resetBoard();
+		alive = false;
+		initializeBoard();
+	}
+	
+	public int getNumUnflaggedBombs() {
+		return BOMBS - num_flagged;
+	}
+	
+	public void initializeBoard() {
+		resetBoard(-10, -10);
+		alive = false;
 	}
 
 	public boolean isAlive() {
@@ -36,8 +47,9 @@ public class MS_Model {
 		return states;
 	}
 
-	public void resetBoard() {
+	public void resetBoard(int X_PROTECTED, int Y_PROTECTED) {
 		alive = true;
+		num_flagged = 0;
 		for (int i = 0; i < WIDTH; i++) {
 			for (int j = 0; j < HEIGHT; j++) {
 				tiles[i][j] = 0;
@@ -48,6 +60,7 @@ public class MS_Model {
 		for (int i = 0; i < BOMBS;) {
 			int w = r.nextInt(WIDTH);
 			int h = r.nextInt(HEIGHT);
+			if (Math.abs(w-X_PROTECTED) < 2 && Math.abs(h-Y_PROTECTED) < 2) continue;
 			if (tiles[w][h] == 0) {
 				tiles[w][h] = -1;
 				++i;
@@ -75,10 +88,11 @@ public class MS_Model {
 	}
 	
 	public boolean leftClick(int x, int y) {
+		if (!isAlive()) resetBoard(x, y);
 		if (states[x][y] == TileState.VISIBLE ||
 			states[x][y] == TileState.FLAGGED) return true;
 		if (tiles[x][y] == -1) {
-			alive = false;
+			initializeBoard();
 			return false;
 		}
 		if (tiles[x][y] == 0) {
@@ -101,14 +115,27 @@ public class MS_Model {
 	}
 
 	public void rightClick(int x, int y) {
-		if (states[x][y] == TileState.VISIBLE) return;
-		states[x][y] = states[x][y] == TileState.HIDDEN ?
-						TileState.FLAGGED : TileState.HIDDEN;
+		if (!isAlive()) return;
+//		if (states[x][y] == TileState.VISIBLE) return;
+//		states[x][y] = states[x][y] == TileState.HIDDEN ?
+//						TileState.FLAGGED : TileState.HIDDEN;
+//		if (states[x][y] == TileState.HIDDEN) {
+//			states[x][y] = TileState.FLAGGED;
+//			num_flagged++;
+//		}
+		switch (states[x][y]) {
+		case HIDDEN:	states[x][y] = TileState.FLAGGED;
+						num_flagged++;
+						break;
+		case FLAGGED:	states[x][y] = TileState.HIDDEN;
+						num_flagged--;
+		}
 	}
 
 	private void makeSectionVisible(int x,int y) {
 		if (x < 0 || x >= WIDTH || y < 0 || y >= HEIGHT) return;
 		if (states[x][y] == TileState.VISIBLE) return;
+		if (states[x][y] == TileState.FLAGGED) num_flagged--; 
 		states[x][y] = TileState.VISIBLE;
 		if (tiles[x][y] != 0) return;
 		
@@ -125,6 +152,10 @@ public class MS_Model {
 	
 	public int getHeight() {
 		return HEIGHT;
+	}
+	
+	public int getNumberOfBombs() {
+		return BOMBS;
 	}
 
 }
