@@ -56,6 +56,7 @@ public class MS_Viewer extends JPanel {
 		MS_Model.TileState[][] states = model.getTileStates();
 		final int[][] tiles = model.getTiles();
 		final int num_bombs_left = model.getNumUnflaggedBombs();
+		final int total_bombs = model.getNumBombs();
 		
 		for (int i = 0; i < states.length; i++) {
 			for (int j = 0; j < states[0].length; j++) {
@@ -83,7 +84,7 @@ public class MS_Viewer extends JPanel {
 			}
 		}
 		bombs_left.setForeground(num_bombs_left < 0 ? Color.RED : Color.GREEN);
-		bombs_left.setText(new String("Bombs left: " + num_bombs_left));
+		bombs_left.setText(new String("Bombs left: " + num_bombs_left + " / " + total_bombs));
 	}
 	
 }

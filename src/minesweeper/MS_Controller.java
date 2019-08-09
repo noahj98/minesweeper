@@ -16,7 +16,7 @@ public class MS_Controller implements MouseListener {
 		model = new MS_Model(num_horz_tiles, num_vert_tiles, num_bombs);
 		viewer = new MS_Viewer(model, tile_dimension);
 		viewer.addMouseListener(this);
-		time = System.nanoTime();
+		time = -1L;
 	}
 
 	public void mouseClicked(MouseEvent e) {
@@ -35,17 +35,19 @@ public class MS_Controller implements MouseListener {
 		int x = e.getX()/viewer.getTileDimension();
 		int y = e.getY()/viewer.getTileDimension();
 		
-		
 		if (e.getButton() == MouseEvent.BUTTON1)
 			model.leftClick(x, y);
 		else if (e.getButton() == MouseEvent.BUTTON3)
 			model.rightClick(x, y);
 		
-		if (model.hasWon()) {
-			double total_time = (System.nanoTime() - time) / 100000000.0;
-			System.out.println("WINNER WINNER " + ((int)(total_time)) / 10.0);
+		switch (model.getGameState()) {
+		case WON:		double total_time = (System.nanoTime() - time) / 100000000.0;
+						System.out.println("WINNER WINNER " + (time == -1L ? 0 : ((int)(total_time)) / 10.0));
+		case DEAD:		time = -1L;
+						break;
+		case ALIVE:		if (time == -1L) time = System.nanoTime();
 		}
-		
+						
 		viewer.updateUI();
 	}
 

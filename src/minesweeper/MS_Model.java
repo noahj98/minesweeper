@@ -4,11 +4,11 @@ import java.util.Random;
 
 public class MS_Model {
 	
-	private enum GameState {
+	enum GameState {
 		ALIVE, DEAD, NOT_INITIALIZED, WON
 	}
 	
-	public enum TileState {
+	enum TileState {
 		VISIBLE, HIDDEN, FLAGGED
 	}
 	
@@ -35,11 +35,19 @@ public class MS_Model {
 		return BOMBS - num_flagged;
 	}
 	
+	public int getNumBombs() {
+		return BOMBS;
+	}
+	
 	public void prepareBoard() {
 		resetBoard(-10, -10);
 		gamestate = GameState.NOT_INITIALIZED;
 	}
 
+	public GameState getGameState() {
+		return gamestate;
+	}
+	
 	public boolean isDead() {
 		return gamestate == GameState.DEAD;
 	}
