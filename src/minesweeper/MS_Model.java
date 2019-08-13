@@ -4,6 +4,12 @@ import java.util.Random;
 
 public class MS_Model {
 	
+	/*
+	 * MS_Model
+	 * 
+	 * holds the logic for minesweeper
+	 */
+	
 	enum GameState {
 		ALIVE, DEAD, NOT_INITIALIZED, WON
 	}
@@ -31,43 +37,110 @@ public class MS_Model {
 		prepareBoard();
 	}
 	
+	/*
+	 * getNumUnflaggedBombs()
+	 * 
+	 * returns the total number of bombs less the number of flagged tiles
+	 */
+	
 	public int getNumUnflaggedBombs() {
 		return BOMBS - num_flagged;
 	}
 	
+	/*
+	 * getNumBombs()
+	 * 
+	 * returns total number of bombs
+	 */
+	
 	public int getNumBombs() {
 		return BOMBS;
 	}
+	
+	/*
+	 * prepareBoard()
+	 * 
+	 * wrapper for resetBoard()
+	 * simulates a click off-screen
+	 * 
+	 * used to make all tiles hidden again, but the game hasn't truly started
+	 */
 	
 	public void prepareBoard() {
 		resetBoard(-10, -10);
 		gamestate = GameState.NOT_INITIALIZED;
 	}
 
+	/*
+	 * getGameState()
+	 * 
+	 * returns gamestate - see GameState enum above
+	 */
+	
 	public GameState getGameState() {
 		return gamestate;
 	}
+	
+	/*
+	 * isDead()
+	 * 
+	 * returns true if a bomb has been hit
+	 */
 	
 	public boolean isDead() {
 		return gamestate == GameState.DEAD;
 	}
 	
+	/*
+	 * hasWon()
+	 * 
+	 * returns true if the game has been won
+	 */
+	
 	public boolean hasWon() {
 		return gamestate == GameState.WON;
 	}
+	
+	/*
+	 * isAlive()
+	 * 
+	 * returns true it no bombs have been hit yet
+	 */
 	
 	public boolean isAlive() {
 		return gamestate == GameState.ALIVE;
 	}
 	
+	/*
+	 * getTiles()
+	 * 
+	 * returns the array of tiles
+	 */
+	
 	public int[][] getTiles() {
 		return tiles;
 	}
 
+	/*
+	 * getTileState()
+	 * 
+	 * returns the array of states - see TileState enum above
+	 */
+	
 	public TileState[][] getTileStates() {
 		return states;
 	}
 
+	/*
+	 * resetBoard(int, int)
+	 * 
+	 * used to start the game
+	 * when the user initially clicks,
+	 * this sets up the board and ensures
+	 * a 3x3 around the tile the user clicked
+	 * has no bombs
+	 */
+	
 	public void resetBoard(int X_PROTECTED, int Y_PROTECTED) {
 		gamestate = GameState.ALIVE;
 		num_flagged = 0;
@@ -93,6 +166,13 @@ public class MS_Model {
 		}
 	}
 	
+	/*
+	 * getBombsAround(int, int)
+	 * 
+	 * returns the number of bombs around a tile
+	 * helper function for resetBoard()
+	 */
+	
 	private int getBombsAround(int i, int j) {
 		if (tiles[i][j] == -1) return -1;
 		int val = 0;
@@ -107,6 +187,22 @@ public class MS_Model {
 		return val;
 	}
 	
+	/*
+	 * leftClick(int, int)
+	 * 
+	 * left click logic
+	 * 
+	 * may return prematurely depending on if the
+	 * user has hit a bomb or if the board is not
+	 * set up yet
+	 * 
+	 * handles clicks on:
+	 *  - previously revealed tiles
+	 *  - hidden tiles that:
+	 *  	- are not bombs
+	 *  	- are bombs
+	 */
+	
 	public void leftClick(int x, int y) {
 		switch (gamestate) {
 		case WON:
@@ -118,6 +214,7 @@ public class MS_Model {
 			states[x][y] == TileState.FLAGGED) return;
 		if (tiles[x][y] == -1) {
 			gamestate = GameState.DEAD;
+			states[x][y] = TileState.VISIBLE;
 			return;
 		}
 		if (tiles[x][y] == 0) {
@@ -126,6 +223,16 @@ public class MS_Model {
 			states[x][y] = TileState.VISIBLE;
 		gamestate = checkOnlyBombsHidden() ? GameState.WON : gamestate;
 	}
+	
+	/*
+	 * checkOnlyBombsHidden()
+	 * 
+	 * leftClick(int, int) helper function
+	 * 
+	 * returns true if and only if all tiles
+	 * have been revealed besides the bombs
+	 *  - in this case, the game is won
+	 */
 	
 	private boolean checkOnlyBombsHidden() {
 		for (int i = 0; i < WIDTH; i++) {
@@ -139,6 +246,17 @@ public class MS_Model {
 		return true;
 	}
 
+	/*
+	 * rightClick(int, int)
+	 * 
+	 * right click logic
+	 * 
+	 * this method:
+	 *  - flags tiles
+	 *  - unflags tiles
+	 *  - keeps track of number of flagged tiles
+	 */
+	
 	public void rightClick(int x, int y) {
 		switch (gamestate) {
 		case WON:
@@ -156,6 +274,28 @@ public class MS_Model {
 		}
 	}
 
+	/*
+	 * makeSectionVisible(int, int)
+	 * 
+	 * this is a recursive function
+	 * 
+	 * it reveals the coordinate it receives
+	 * 
+	 * when this function receives
+	 * a coordinate for a tile
+	 * with no adjacent bombs,
+	 * it recursively calls itself
+	 * for the 8 tiles surrounding
+	 * it
+	 * 
+	 * net effect: all nearby tiles
+	 * with no adjacent bombs, and all
+	 * tiles adjacent to these tiles,
+	 * are revealed
+	 * 
+	 * leftClick(int, int) helper function
+	 */
+	
 	private void makeSectionVisible(int x,int y) {
 		if (x < 0 || x >= WIDTH || y < 0 || y >= HEIGHT) return;
 		if (states[x][y] == TileState.VISIBLE) return;
@@ -170,9 +310,21 @@ public class MS_Model {
 		}
 	}
 	
+	/*
+	 * getWidth()
+	 * 
+	 * returns the width
+	 */
+	
 	public int getWidth() {
 		return WIDTH;
 	}
+	
+	/*
+	 * getHeight()
+	 * 
+	 * return the height
+	 */
 	
 	public int getHeight() {
 		return HEIGHT;
