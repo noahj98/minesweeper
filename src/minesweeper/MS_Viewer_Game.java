@@ -57,27 +57,16 @@ public class MS_Viewer_Game extends JPanel {
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
 		
-		MS_Model.TileState[][] states = model.getTileStates();
-		final int[][] tiles = model.getTiles();
-		Color curr_color = Color.WHITE;
-		MS_Model.TileState curr_state = MS_Model.TileState.VISIBLE;
-		int curr_tile = 0;
-		
-		for (int i = 0; i < states.length; i++) {
-			for (int j = 0; j < states[0].length; j++) {
+		MS_Model_Tile[][] tiles = model.getTiles();
+				
+		for (int i = 0; i < tiles.length; i++) {
+			for (int j = 0; j < tiles[0].length; j++) {
 				/*
 				 * 		PAINTS THE SQUARES WHITE OR GRAY
 				 */
-				curr_state = states[i][j];
-				curr_tile = tiles[i][j];
-				
-				switch(curr_state) {
-				case HIDDEN:
-				case FLAGGED:	curr_color = Color.LIGHT_GRAY;
-								break;
-				default:		curr_color = Color.WHITE;
-				}
-				g.setColor(curr_color);
+				if (tiles[i][j].isRevealed()) g.setColor(Color.WHITE);
+				else g.setColor(Color.LIGHT_GRAY);
+
 				g.fillRect(	i * TILE_DIMENSION,
 							j * TILE_DIMENSION,
 							TILE_DIMENSION - 1,
@@ -87,13 +76,12 @@ public class MS_Viewer_Game extends JPanel {
 		
 		if (model.isDead()) {
 			g.setColor(Color.BLACK);
-			for (int i = 0; i < states.length; i++) {
-				for (int j = 0; j < states[0].length; j++) {
+			for (int i = 0; i < tiles.length; i++) {
+				for (int j = 0; j < tiles[0].length; j++) {
 					/*
 					 * 		IF DEAD, PAINT BOMBS
 					 */
-					curr_tile = tiles[i][j];
-					if (curr_tile == -1)
+					if (tiles[i][j].isBomb())
 						g.fillOval(	TILE_DIMENSION * i + TILE_DIMENSION / 5,
 									TILE_DIMENSION * j + TILE_DIMENSION / 5,
 									TILE_DIMENSION * 3 / 5 - 1,
@@ -104,32 +92,101 @@ public class MS_Viewer_Game extends JPanel {
 		
 		String curr_string;
 		
-		for (int i = 0; i < states.length; i++) {
-			for (int j = 0; j < states[0].length; j++) {
+		for (int i = 0; i < tiles.length; i++) {
+			for (int j = 0; j < tiles[0].length; j++) {
 				/*
 				 * 		PAINTS FLAGS AND COUNTERS
 				 */
-				curr_state = states[i][j];
-				curr_tile = tiles[i][j];
 				curr_string = null;
-								
-				switch (curr_state) {
-				case VISIBLE:	if (curr_tile <= 0) continue;
-								curr_color = Color.BLACK;
-								curr_string = Integer.toString(tiles[i][j]);
-								break;
-				case FLAGGED:	curr_color = Color.RED;
-								curr_string = "!";
-								break;
-				default:		continue;
+				
+				g.setColor(Color.BLACK);
+				if (tiles[i][j].isRevealed()) {
+					curr_string = tiles[i][j].getNumberSurroundingBombs();
+				} else if (tiles[i][j].isFlagged()) {
+					curr_string = "!";
+					g.setColor(Color.RED);
 				}
 				
-				g.setColor(curr_color);
+				if (curr_string == null) continue;
+				
 				g.drawString(	curr_string,
 								i * TILE_DIMENSION + TILE_DIMENSION / 5,
 								j * TILE_DIMENSION + 4 * TILE_DIMENSION / 5);
 			}
 		}
+		
+//		MS_Model.TileState[][] states = model.getTileStates();
+//		final int[][] tiles = model.getTiles();
+//		Color curr_color = Color.WHITE;
+//		MS_Model.TileState curr_state = MS_Model.TileState.VISIBLE;
+//		int curr_tile = 0;
+//		
+//		for (int i = 0; i < states.length; i++) {
+//			for (int j = 0; j < states[0].length; j++) {
+//				/*
+//				 * 		PAINTS THE SQUARES WHITE OR GRAY
+//				 */
+//				curr_state = states[i][j];
+//				curr_tile = tiles[i][j];
+//				
+//				switch(curr_state) {
+//				case HIDDEN:
+//				case FLAGGED:	curr_color = Color.LIGHT_GRAY;
+//								break;
+//				default:		curr_color = Color.WHITE;
+//				}
+//				g.setColor(curr_color);
+//				g.fillRect(	i * TILE_DIMENSION,
+//							j * TILE_DIMENSION,
+//							TILE_DIMENSION - 1,
+//							TILE_DIMENSION - 1);
+//			}
+//		}
+//		
+//		if (model.isDead()) {
+//			g.setColor(Color.BLACK);
+//			for (int i = 0; i < states.length; i++) {
+//				for (int j = 0; j < states[0].length; j++) {
+//					/*
+//					 * 		IF DEAD, PAINT BOMBS
+//					 */
+//					curr_tile = tiles[i][j];
+//					if (curr_tile == -1)
+//						g.fillOval(	TILE_DIMENSION * i + TILE_DIMENSION / 5,
+//									TILE_DIMENSION * j + TILE_DIMENSION / 5,
+//									TILE_DIMENSION * 3 / 5 - 1,
+//									TILE_DIMENSION * 3 / 5 - 1);
+//				}
+//			}
+//		}
+//		
+//		String curr_string;
+//		
+//		for (int i = 0; i < states.length; i++) {
+//			for (int j = 0; j < states[0].length; j++) {
+//				/*
+//				 * 		PAINTS FLAGS AND COUNTERS
+//				 */
+//				curr_state = states[i][j];
+//				curr_tile = tiles[i][j];
+//				curr_string = null;
+//								
+//				switch (curr_state) {
+//				case VISIBLE:	if (curr_tile <= 0) continue;
+//								curr_color = Color.BLACK;
+//								curr_string = Integer.toString(tiles[i][j]);
+//								break;
+//				case FLAGGED:	curr_color = Color.RED;
+//								curr_string = "!";
+//								break;
+//				default:		continue;
+//				}
+//				
+//				g.setColor(curr_color);
+//				g.drawString(	curr_string,
+//								i * TILE_DIMENSION + TILE_DIMENSION / 5,
+//								j * TILE_DIMENSION + 4 * TILE_DIMENSION / 5);
+//			}
+//		}
 	}
-
 }

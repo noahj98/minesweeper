@@ -40,9 +40,18 @@ public class MS_Viewer_Counter extends JPanel {
 	 * updates bomb counter
 	 */
 	
-	public void update() {
+	public void update(double time) {
+		if (model.isBlank()) {
+			bomb_label.setText(null);
+			return;
+		}
 		bomb_label.setForeground(model.getNumUnflaggedBombs() < 0 ? Color.RED : Color.GREEN);
-		bomb_label.setText(new String("Bombs remaining: " + model.getNumUnflaggedBombs() + " / " + model.getNumBombs()));
+		bomb_label.setText(String.format("Bombs remaining: %1$3d / %2$3d %3$8.2f",
+											model.getNumUnflaggedBombs(),
+											model.getNumBombs(),
+											time));
+//		bomb_label.setText(String.format("Bombs remaining: " + model.getNumUnflaggedBombs() + " / " +
+//										model.getNumBombs() + "     %.2f", time));
 	}
 	
 }

@@ -64,9 +64,13 @@ public class MS_Viewer extends JFrame {
 	 * updates game viewer and bomb counter viewer
 	 */
 	
-	public void updateViewer() {
+	public void updateViewer(long time) {
 		game_viewer.updateUI();
-		game_counter.update();
+		updateTime(time);
+	}
+	
+	public void updateTime(long time) {
+		game_counter.update(((int) (time / 10000000.0)) / 100.0);
 	}
 	
 }

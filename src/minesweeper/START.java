@@ -16,7 +16,7 @@ public class START {
 			} catch (Exception e) {}
 		} while (NUM_BOMBS < 10 || NUM_BOMBS > 100);
 				
-		final int TILE_PIX = 30;
+		final int TILE_PIX = 30; //orig = 30
 		final int W_TILE = 24;
 		final int H_TILE = 16;
 		//very easy	40
